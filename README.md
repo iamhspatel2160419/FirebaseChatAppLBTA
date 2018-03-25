@@ -24,7 +24,7 @@ Collection, firebase, animation, TableView in code
     
     - perfect example of ios 9 constraints using NSAnchor of NSlayout for loginview
     - collection view of chat layout done in coding using two way
-    - Uiviewcontroller have called property called inputAccesoryView
+    - UICollectionview have called property called inputAccesoryView
          when scrolling happens and this property will be set
           - collectionView?.keyboardDismissMode = .interactive
       
@@ -39,7 +39,52 @@ Collection, firebase, animation, TableView in code
          fileprivate func estimateFrameForText(_ text: String) -> CGRect {
           let size = CGSize(width: 200, height: 1000)
           let options = NSStringDrawingOptions.usesFontLeading.union(.usesLineFragmentOrigin)
-          return NSString(string: text).boundingRect(with: size, options: options, attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: 16)], context: nil)
+          return NSString(string: text).boundingRect(with: size, options: options, attributes: [NSFontAttributeName:     UIFont.systemFont(ofSize: 16)], context: nil)
          }
-     -
-    
+      - In chat Application Uicollection cell containg Text, image and video for chat VC they all are put in bubbleVIew.
+        and setting dynamic height and width for it. check that code.. go inside
+      
+      - Image caching using UIImageVIew Extension
+      
+            import UIKit
+            // NScaching for imageview image data
+            let imageCache = NSCache<AnyObject, AnyObject>()
+            extension UIImageView {
+   
+            func loadImageUsingCacheWithUrlString(_ urlString: String) {
+        
+                self.image = nil
+
+                //check cache for image first
+                if let cachedImage = imageCache.object(forKey: urlString as AnyObject) as? UIImage {
+                    self.image = cachedImage
+                    return
+                }
+
+                //otherwise fire off a new download
+                let url = URL(string: urlString)
+                URLSession.shared.dataTask(with: url!, completionHandler: { (data, response, error) in
+
+                    //download hit an error so lets return out
+                    if error != nil {
+                        print(error ?? "")
+                        return
+                    }
+
+                    DispatchQueue.main.async(execute: {
+
+                        if let downloadedImage = UIImage(data: data!) {
+                            imageCache.setObject(downloadedImage, forKey: urlString as AnyObject)
+
+                            self.image = downloadedImage
+                        }
+                    })
+
+                    }).resume()
+                  }
+
+                }
+      
+      
+      
+      
